@@ -1,23 +1,58 @@
-import logo from './logo.svg';
-import './App.css';
+// App.jsx
+import React, { useState, useEffect } from "react";
 
 function App() {
+  const [thumbnails, setThumbnails] = useState([]);
+  const [fullSizeImage, setFullSizeImage] = useState(null);
+
+  useEffect(() => {
+    // Fetch thumbnails with specific dimensions
+    fetch("https://picsum.photos/v2/list?limit=20")
+      .then((response) => response.json())
+      .then((data) => {
+        const updatedThumbnails = data.map((item) => ({
+          ...item,
+          thumbnail_url: `https://picsum.photos/id/${item.id}/50/50`,
+        }));
+        setThumbnails(updatedThumbnails);
+      })
+      .catch((error) => {
+        console.error("Error fetching thumbnails:", error);
+      });
+  }, []);
+
+  // Function to show full-size image
+  const showFullSize = (image) => {
+    setFullSizeImage({
+      id: image.id,
+      url: `https://picsum.photos/id/${image.id}/350/350`,
+    });
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      {/* Thumbnails container */}
+      <div className="thumbnails-container">
+        {thumbnails.map((thumbnail) => (
+          <div
+            className="thumbnail"
+            key={thumbnail.id}
+            onClick={() => showFullSize(thumbnail)}
+          >
+            <img
+              src={thumbnail.thumbnail_url}
+              alt={`Thumbnail ${thumbnail.id}`}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Full-size image */}
+      {fullSizeImage && (
+        <div className="full-size">
+          <img src={fullSizeImage.url} alt={`Full Size ${fullSizeImage.id}`} />
+        </div>
+      )}
     </div>
   );
 }
